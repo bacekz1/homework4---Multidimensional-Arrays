@@ -22,7 +22,7 @@ public class Task2 {
         for (int row = 0; row < table.length; row++) {
             int rowLength = table[row].length - row;
             for (int col = 0; col < table[row].length; col++) {
-                if (rowLength - 1 == col) {
+                if (rowLength -1 == col) {
                     System.out.print(table[row][col]);
                 }
             }
