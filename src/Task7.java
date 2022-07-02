@@ -14,6 +14,7 @@ public class Task7 {
         int col = 0;
         int row = 0;
         int rowSum = 0;
+        int result = 0;
         while (row < matrix.length) {
 
             if (row % 2 != 0) {
@@ -21,18 +22,20 @@ public class Task7 {
                     col = 1;
                 }
             }
-            System.out.print(matrix[row][col] + " ");
+            System.out.print(matrix[row][col] + ",  ");
             rowSum += matrix[row][col];
+            result +=matrix[row][col];
             col += 2;
 
             if (col >= matrix.length) {
-                System.out.print("sum of elements for row " + rowSum);
+                System.out.print("sum of elements for row: " + rowSum);
                 System.out.println();
                 row++;
                 rowSum = 0;
                 col = 0;
             }
         }
+        System.out.println("Sum of elements: " + result);
     }
 }
 
