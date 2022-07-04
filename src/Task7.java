@@ -17,22 +17,21 @@ public class Task7 {
         int result = 0;
         while (row < matrix.length) {
 
-            if (row % 2 != 0) {
-                if (col == 0) {
-                    col = 1;
-                }
-            }
             System.out.print(matrix[row][col] + ",  ");
             rowSum += matrix[row][col];
-            result +=matrix[row][col];
+            result += matrix[row][col];
             col += 2;
 
             if (col >= matrix.length) {
                 System.out.print("sum of elements for row: " + rowSum);
                 System.out.println();
                 row++;
+                if (row % 2 != 0) {
+                    col = 1;
+                } else {
+                    col = 0;
+                }
                 rowSum = 0;
-                col = 0;
             }
         }
         System.out.println("Sum of elements: " + result);
