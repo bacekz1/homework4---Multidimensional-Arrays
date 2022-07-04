@@ -3,18 +3,19 @@ import java.util.Scanner;
 
 public class Game {
     public static void main(String[] args) {
-        //да оправя случая когато камъка е до храст и в края на полето
+        //да оправя случая когато камъка е до храст и e в края на полето
         //да оправя случая когато храстите запушват изхода
         Random random = new Random();
         Scanner sc = new Scanner(System.in);
         System.out.println("Please select difficult from 1 to 3");
-        int difficult = 0;
+        int difficult;
         int matrixLength = 0;
         int difficultPercent = 0;
+
         do {
             difficult = sc.nextInt();
             if (difficult > 3 || difficult <= 0) {
-                System.out.println("Please chose difficult from 1 to 3");
+                System.out.println("Please select difficult from 1 to 3");
             }
 
             switch (difficult) {
@@ -36,6 +37,7 @@ public class Game {
             }
         }
         while (difficult > 3 || difficult <= 0);
+
         char[][] matrix = new char[matrixLength][matrixLength];
 
         int peopleRow = random.nextInt(matrixLength);
@@ -76,12 +78,12 @@ public class Game {
         while (true) {
             int rockRow = random.nextInt(matrixLength);
             int rockCol = random.nextInt(matrixLength);
-            boolean isRocketInTheEnd = rockRow == matrixLength - 1 && rockCol == matrixLength - 1;
-            boolean isRocketOnBorder = rockRow + 1 < matrixLength - 1 && rockRow - 1 > 0 &&
+            boolean isRockInTheEnd = rockRow == matrixLength - 1 && rockCol == matrixLength - 1;
+            boolean isRockOnBorder = rockRow + 1 < matrixLength - 1 && rockRow - 1 > 0 &&
                     rockCol + 1 < matrixLength - 1 && rockCol - 1 > 0;
 
             if (matrix[rockRow][rockCol] != people && matrix[rockRow][rockCol] != bush &&
-                    !isRocketInTheEnd && isRocketOnBorder) {
+                    !isRockInTheEnd && isRockOnBorder) {
                 boolean leftBush = matrix[rockRow][rockCol - 1] == bush;
                 boolean rightBush = matrix[rockRow][rockCol + 1] == bush;
                 boolean upBush = matrix[rockRow - 1][rockCol] == bush;
@@ -95,8 +97,7 @@ public class Game {
             }
         }
 
-        System.out.println("You can move your people with" +
-                " w for forward, a for left, s for backward and d for right");
+        System.out.println("You can move with w = forward, a = left, s = backward and d = right");
         //print matrix
         for (int i = 0; i < matrix.length; i++) {
             for (int j = 0; j < matrix.length; j++) {
@@ -107,9 +108,9 @@ public class Game {
 
         while (!gameOver || !success) {
 
-            char direction = sc.next().charAt(0);
+            char directions = sc.next().charAt(0);
 
-            switch (direction) {
+            switch (directions) {
                 //up
                 case 'w':
                     //game over
@@ -122,7 +123,7 @@ public class Game {
                     if (matrix[peopleRow - 1][peopleCol] == bush) {
                         break;
                     }
-                    //rocket logic
+                    //rock logic
                     if (matrix[peopleRow - 1][peopleCol] == rock) {
                         int rockRow = peopleRow - 1;
                         int rockCol = peopleCol;
@@ -156,7 +157,7 @@ public class Game {
                     if (matrix[peopleRow][peopleCol - 1] == bush) {
                         break;
                     }
-                    //rocket logic
+                    //rock logic
                     if (matrix[peopleRow][peopleCol - 1] == rock) {
                         int rockRow = peopleRow;
                         int rockCol = peopleCol - 1;
@@ -190,7 +191,7 @@ public class Game {
                     if (matrix[peopleRow + 1][peopleCol] == bush) {
                         break;
                     }
-                    //rocket logic
+                    //rock logic
                     if (matrix[peopleRow + 1][peopleCol] == rock) {
                         int rockRow = peopleRow + 1;
                         int rockCol = peopleCol;
@@ -224,7 +225,7 @@ public class Game {
                     if (matrix[peopleRow][peopleCol + 1] == bush) {
                         break;
                     }
-                    //rocket logic
+                    //rock logic
                     if (matrix[peopleRow][peopleCol + 1] == rock) {
                         int rockRow = peopleRow;
                         int rockCol = peopleCol + 1;
@@ -261,11 +262,11 @@ public class Game {
             for (int i = 0; i < matrix.length; i++) {
                 for (int j = 0; j < matrix.length; j++) {
                     System.out.print(matrix[i][j] + " ");
-                    boolean isRocketOnBorder = i + 1 < matrixLength - 1 && i - 1 > 0 &&
+                    boolean isRockOnBorder = i + 1 < matrixLength - 1 && i - 1 > 0 &&
                             j + 1 < matrixLength - 1 && j - 1 > 0;
 
                     //bush game over logic
-                    if (isRocketOnBorder && matrix[i][j] == rock) {
+                    if (isRockOnBorder && matrix[i][j] == rock) {
                         boolean leftBush = matrix[i][j - 1] == bush;
                         boolean rightBush = matrix[i][j + 1] == bush;
                         boolean upBush = matrix[i - 1][j] == bush;
