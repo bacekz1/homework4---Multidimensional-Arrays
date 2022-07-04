@@ -3,6 +3,8 @@ import java.util.Scanner;
 
 public class Game {
     public static void main(String[] args) {
+        //да оправя spawn проблемите с камъка
+        //да оправя случая когато камъка е до храст и в края на полето
         Random random = new Random();
         Scanner sc = new Scanner(System.in);
         char[][] matrix = new char[10][10];
