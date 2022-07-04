@@ -4,6 +4,7 @@ import java.util.Scanner;
 public class Game {
     public static void main(String[] args) {
         //да оправя случая когато камъка е до храст и в края на полето
+        //да оправя случая когато храстите запушват изхода
         Random random = new Random();
         Scanner sc = new Scanner(System.in);
         System.out.println("Please select difficult from 1 to 3");
@@ -20,7 +21,7 @@ public class Game {
                 case 1:
                     matrixLength = 10;
                     //12.5 percent
-                    difficultPercent = 2;
+                    difficultPercent = 8;
                     break;
                 case 2:
                     matrixLength = 20;
@@ -95,7 +96,7 @@ public class Game {
         }
 
         System.out.println("You can move your people with" +
-                " w for forward, а for left, s for backward and d for right");
+                " w for forward, a for left, s for backward and d for right");
         //print matrix
         for (int i = 0; i < matrix.length; i++) {
             for (int j = 0; j < matrix.length; j++) {
@@ -103,7 +104,6 @@ public class Game {
             }
             System.out.println();
         }
-
 
         while (!gameOver || !success) {
 
@@ -275,7 +275,6 @@ public class Game {
                             gameOver = true;
                         }
                     }
-
                 }
                 System.out.println();
             }
@@ -287,8 +286,6 @@ public class Game {
             if (success) {
                 System.out.println("Congrats you win the game");
             }
-
         }
-
     }
 }
