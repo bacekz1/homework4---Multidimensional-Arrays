@@ -5,6 +5,7 @@ public class Game {
     public static void main(String[] args) {
         //да оправя случая когато камъка е до храст и e в края на полето
         //да оправя случая когато храстите запушват изхода
+        //fix border method
         Random random = new Random();
         Scanner sc = new Scanner(System.in);
         System.out.println("Please select difficult from 1 to 3");
@@ -67,10 +68,7 @@ public class Game {
             boolean isBushInTheEnd = bushRow == matrixLength - 1 && bushCol == matrixLength - 1;
             if (matrix[bushRow][bushCol] != people && !isBushInTheEnd) {
                 matrix[bushRow][bushCol] = bush;
-            }
-            if (matrix[bushRow][bushCol] != people && !isBushInTheEnd) {
                 count--;
-                matrix[bushRow][bushCol] = bush;
             }
         }
 
@@ -79,8 +77,8 @@ public class Game {
             int rockRow = random.nextInt(matrixLength);
             int rockCol = random.nextInt(matrixLength);
             boolean isRockInTheEnd = rockRow == matrixLength - 1 && rockCol == matrixLength - 1;
-            boolean isRockOnBorder = rockRow + 1 < matrixLength - 1 && rockRow - 1 > 0 &&
-                    rockCol + 1 < matrixLength - 1 && rockCol - 1 > 0;
+            boolean isRockOnBorder = rockRow + 1 < matrixLength  && rockRow - 1 > -1 &&
+                    rockCol + 1 < matrixLength  && rockCol - 1 > -1;
 
             if (matrix[rockRow][rockCol] != people && matrix[rockRow][rockCol] != bush &&
                     !isRockInTheEnd && isRockOnBorder) {
@@ -262,8 +260,8 @@ public class Game {
             for (int i = 0; i < matrix.length; i++) {
                 for (int j = 0; j < matrix.length; j++) {
                     System.out.print(matrix[i][j] + " ");
-                    boolean isRockOnBorder = i + 1 < matrixLength - 1 && i - 1 > 0 &&
-                            j + 1 < matrixLength - 1 && j - 1 > 0;
+                    boolean isRockOnBorder = i + 1 < matrixLength  && i - 1 > -1 &&
+                            j + 1 < matrixLength && j - 1 > -1;
 
                     //bush game over logic
                     if (isRockOnBorder && matrix[i][j] == rock) {
