@@ -1,4 +1,3 @@
-
 import java.util.Random;
 import java.util.Scanner;
 
@@ -17,7 +16,7 @@ public class Game {
         //fix difficult percents
         Scanner sc = new Scanner(System.in);
         System.out.println("Please select difficult from 1 to 3");
-        int difficult;
+        char difficult;
         int matrixLength = 0;
         int difficultPercent = 0;
         boolean gameOver = false;
@@ -29,30 +28,30 @@ public class Game {
         int rockCol;
 
         do {
-            difficult = sc.nextInt();
-            if (difficult > 3 || difficult <= 0) {
+            difficult = sc.nextLine().charAt(0);
+            if (difficult > 51 || difficult < 49) {
                 System.out.println("Please select difficult from 1 to 3");
             }
 
             switch (difficult) {
-                case 1 -> {
+                case '1' -> {
                     matrixLength = 12;
                     //12.5 percents bushes
                     difficultPercent = 8;
                 }
-                case 2 -> {
+                case '2' -> {
                     matrixLength = 17;
                     //20 percents bushes
                     difficultPercent = 5;
                 }
-                case 3 -> {
+                case '3' -> {
                     matrixLength = 27;
                     //33.33 percents bushes
                     difficultPercent = 3;
                 }
             }
         }
-        while (difficult > 3 || difficult <= 0);
+        while (difficult < 49 || difficult > 51);
 
         //initializing matrix
         char[][] matrix = new char[matrixLength][matrixLength];
@@ -61,15 +60,15 @@ public class Game {
         //add the exit
         matrix[matrix.length - 2][matrix.length - 2] = exit;
         //add the people
-        int peopleRow = giveMeRandomNum(1, matrixLength - 3);
-        int peopleCol = giveMeRandomNum(1, matrixLength - 3);
+        int peopleRow = giveMeRandomNum( matrixLength - 2);
+        int peopleCol = giveMeRandomNum( matrixLength - 2);
         matrix[peopleRow][peopleCol] = people;
 
         //adds the bushes
         int count = (matrixLength * matrixLength) / difficultPercent;
         while (count > 0) {
-            int bushRow = giveMeRandomNum(matrixLength - 2);
-            int bushCol = giveMeRandomNum(matrixLength - 2);
+            int bushRow = giveMeRandomNum(matrixLength - 1);
+            int bushCol = giveMeRandomNum(matrixLength - 1);
             if (canSpawnBush(matrix, bushRow, bushCol)) {
                 matrix[bushRow][bushCol] = bush;
                 count--;
@@ -266,18 +265,18 @@ public class Game {
         }
 
     }
-
-    static int giveMeRandomNum(int from, int to) {
-        Random random = new Random();
-        return random.nextInt(from, to);
-    }
-
     static int giveMeRandomNum(int to) {
         Random random = new Random();
         return random.nextInt(to);
     }
 
     static boolean canSpawnBush(char[][] matrix, int row, int col) {
+        if (row == matrix.length - 2 && col < matrix.length - 3) {
+            col++;
+        }
+        if (col == matrix.length - 2 && row < matrix.length - 3) {
+            row++;
+        }
         return (matrix[row][col] != people && matrix[row][col] != rowBorder
                 && matrix[row][col] != colBorder && matrix[row][col] != exit);
     }
