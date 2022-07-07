@@ -1,17 +1,33 @@
+
 import java.util.Random;
 import java.util.Scanner;
 
 public class Game {
+    static char empty = ' ';
+    static char rowBorder = '-';
+    static char colBorder = '|';
+    static char exit = 'E';
+    static char people = 'P';
+    static char deadPeople = 'D';
+    static char rock = 'R';
+    static char bush = '#';
+
     public static void main(String[] args) {
-        //да оправя случая когато камъка е до храст и e в края на полето
         //да оправя случая когато храстите запушват изхода
-        //fix border method
-        Random random = new Random();
+        //fix difficult percent
         Scanner sc = new Scanner(System.in);
         System.out.println("Please select difficult from 1 to 3");
         int difficult;
         int matrixLength = 0;
         int difficultPercent = 0;
+        boolean gameOver = false;
+        boolean success = false;
+        int rightBorderBushPosition = -1;
+        int downBorderBushPosition = -1;
+
+        int rockRow;
+        int rockCol;
+
 
         do {
             difficult = sc.nextInt();
@@ -20,91 +36,68 @@ public class Game {
             }
 
             switch (difficult) {
-                case 1:
-                    matrixLength = 10;
+                case 1 -> {
+                    matrixLength = 12;
                     //12.5 percent
                     difficultPercent = 8;
-                    break;
-                case 2:
-                    matrixLength = 20;
+                }
+                case 2 -> {
+                    matrixLength = 17;
                     //20 percent
                     difficultPercent = 5;
-                    break;
-                case 3:
-                    matrixLength = 30;
+                }
+                case 3 -> {
+                    matrixLength = 27;
                     //33.33 percent
                     difficultPercent = 3;
-                    break;
+                }
             }
         }
         while (difficult > 3 || difficult <= 0);
 
+        //initializing matrix
         char[][] matrix = new char[matrixLength][matrixLength];
+        //add borders and replace char 0 with ' '
+        fillMatrix(matrix);
+        //add exit
+        matrix[matrix.length - 2][matrix.length - 2] = exit;
+        //add people
+        int peopleRow = giveMeRandomNum(1, matrixLength - 2);
+        int peopleCol = giveMeRandomNum(1, matrixLength - 2);
+        matrix[peopleRow][peopleCol] = people;
 
-        int peopleRow = random.nextInt(matrixLength);
-        int peopleCol = random.nextInt(matrixLength);
-        char exit = 'E';
-        char people = 'P';
-        char rock = 'R';
-        char bush = '#';
-        boolean gameOver = false;
-        boolean success = false;
-        matrix[matrix.length - 1][matrix.length - 1] = exit;
-
-        //initialized people
-        while (true) {
-            boolean isPeopleInTheEnd = peopleRow == matrixLength - 1 && peopleCol == matrixLength - 1;
-            if (!isPeopleInTheEnd) {
-                matrix[peopleRow][peopleCol] = people;
-                break;
-            }
-        }
-
-        //initialized bush
+        //adds the bushes
         int count = (matrixLength * matrixLength) / difficultPercent;
         while (count > 0) {
-            int bushRow = random.nextInt(matrixLength);
-            int bushCol = random.nextInt(matrixLength);
-            boolean isBushInTheEnd = bushRow == matrixLength - 1 && bushCol == matrixLength - 1;
-            if (matrix[bushRow][bushCol] != people && !isBushInTheEnd) {
+            int bushRow = giveMeRandomNum(matrixLength);
+            int bushCol = giveMeRandomNum(matrixLength);
+            if (canSpawnBushes(matrix, bushRow, bushCol)) {
+                if (bushRow == matrixLength - 2) {
+                    downBorderBushPosition = bushCol;
+                }
+                if (bushCol == matrixLength - 2) {
+                    rightBorderBushPosition = bushRow;
+                }
                 matrix[bushRow][bushCol] = bush;
                 count--;
             }
         }
 
-        //initialized rock
+        //add the rock
         while (true) {
-            int rockRow = random.nextInt(matrixLength);
-            int rockCol = random.nextInt(matrixLength);
-            boolean isRockInTheEnd = rockRow == matrixLength - 1 && rockCol == matrixLength - 1;
-            boolean isRockOnBorder = rockRow + 1 < matrixLength  && rockRow - 1 > -1 &&
-                    rockCol + 1 < matrixLength  && rockCol - 1 > -1;
-
-            if (matrix[rockRow][rockCol] != people && matrix[rockRow][rockCol] != bush &&
-                    !isRockInTheEnd && isRockOnBorder) {
-                boolean leftBush = matrix[rockRow][rockCol - 1] == bush;
-                boolean rightBush = matrix[rockRow][rockCol + 1] == bush;
-                boolean upBush = matrix[rockRow - 1][rockCol] == bush;
-                boolean downBush = matrix[rockRow + 1][rockCol] == bush;
-                boolean canNotMove = (leftBush && upBush) || (leftBush && downBush) ||
-                        (rightBush && upBush) || (rightBush && downBush);
-                if (!canNotMove) {
-                    matrix[rockRow][rockCol] = rock;
-                    break;
-                }
+            rockRow = giveMeRandomNum(matrixLength);
+            rockCol = giveMeRandomNum(matrixLength);
+            if (canSpawnRocks(matrix, rockRow, rockCol) && canRockMove(matrix, rockRow, rockCol)) {
+                matrix[rockRow][rockCol] = rock;
+                break;
             }
         }
 
         System.out.println("You can move with w = forward, a = left, s = backward and d = right");
         //print matrix
-        for (int i = 0; i < matrix.length; i++) {
-            for (int j = 0; j < matrix.length; j++) {
-                System.out.print(matrix[i][j] + " ");
-            }
-            System.out.println();
-        }
+        printMatrix(matrix);
 
-        while (!gameOver || !success) {
+        while (!gameOver && !success) {
 
             char directions = sc.next().charAt(0);
 
@@ -112,8 +105,7 @@ public class Game {
                 //up
                 case 'w':
                     //game over
-                    if (peopleRow - 1 < 0) {
-                        System.out.println("Game over");
+                    if (isOutOfBounds(matrix, peopleRow - 1)) {
                         gameOver = true;
                         break;
                     }
@@ -123,10 +115,9 @@ public class Game {
                     }
                     //rock logic
                     if (matrix[peopleRow - 1][peopleCol] == rock) {
-                        int rockRow = peopleRow - 1;
-                        int rockCol = peopleCol;
+                        rockRow = peopleRow - 1;
                         //game over
-                        if (rockRow - 1 < 0) {
+                        if (isOutOfBounds(matrix, rockRow - 1)) {
                             System.out.println("Game over");
                             gameOver = true;
                             break;
@@ -135,19 +126,19 @@ public class Game {
                         if (matrix[rockRow - 1][rockCol] == bush) {
                             break;
                         }
-                        matrix[peopleRow][peopleCol] = 0;
+                        matrix[peopleRow][peopleCol] = empty;
                         matrix[--peopleRow][peopleCol] = people;
                         matrix[--rockRow][rockCol] = rock;
                         break;
                     }
 
-                    matrix[peopleRow][peopleCol] = 0;
+                    matrix[peopleRow][peopleCol] = empty;
                     matrix[--peopleRow][peopleCol] = people;
                     break;
                 //left
                 case 'a':
                     //game over
-                    if (peopleCol - 1 < 0) {
+                    if (isOutOfBounds(matrix, peopleCol - 1)) {
                         gameOver = true;
                         break;
                     }
@@ -157,10 +148,9 @@ public class Game {
                     }
                     //rock logic
                     if (matrix[peopleRow][peopleCol - 1] == rock) {
-                        int rockRow = peopleRow;
-                        int rockCol = peopleCol - 1;
+                        rockCol = peopleCol - 1;
                         //game over
-                        if (rockCol - 1 < 0) {
+                        if (isOutOfBounds(matrix, rockCol - 1)) {
                             gameOver = true;
                             break;
                         }
@@ -168,20 +158,20 @@ public class Game {
                         if (matrix[rockRow][rockCol - 1] == bush) {
                             break;
                         }
-                        matrix[peopleRow][peopleCol] = 0;
+                        matrix[peopleRow][peopleCol] = empty;
                         matrix[peopleRow][--peopleCol] = people;
                         matrix[rockRow][--rockCol] = rock;
                         break;
 
                     }
 
-                    matrix[peopleRow][peopleCol] = 0;
+                    matrix[peopleRow][peopleCol] = empty;
                     matrix[peopleRow][--peopleCol] = people;
                     break;
                 //down
                 case 's':
                     //game over
-                    if (peopleRow + 1 > matrix.length - 1) {
+                    if (isOutOfBounds(matrix, peopleRow + 1)) {
                         gameOver = true;
                         break;
                     }
@@ -191,10 +181,9 @@ public class Game {
                     }
                     //rock logic
                     if (matrix[peopleRow + 1][peopleCol] == rock) {
-                        int rockRow = peopleRow + 1;
-                        int rockCol = peopleCol;
+                        rockRow = peopleRow + 1;
                         //game over
-                        if (rockRow + 1 > matrix.length - 1) {
+                        if (isOutOfBounds(matrix, rockRow + 1)) {
                             gameOver = true;
                             break;
                         }
@@ -202,20 +191,20 @@ public class Game {
                         if (matrix[rockRow + 1][rockCol] == bush) {
                             break;
                         }
-                        matrix[peopleRow][peopleCol] = 0;
+                        matrix[peopleRow][peopleCol] = empty;
                         matrix[++peopleRow][peopleCol] = people;
                         matrix[++rockRow][rockCol] = rock;
                         break;
 
                     }
 
-                    matrix[peopleRow][peopleCol] = 0;
+                    matrix[peopleRow][peopleCol] = empty;
                     matrix[++peopleRow][peopleCol] = people;
                     break;
                 //right
                 case 'd':
                     //game over
-                    if (peopleCol + 1 > matrix.length - 1) {
+                    if (isOutOfBounds(matrix, peopleCol + 1)) {
                         gameOver = true;
                         break;
                     }
@@ -225,10 +214,9 @@ public class Game {
                     }
                     //rock logic
                     if (matrix[peopleRow][peopleCol + 1] == rock) {
-                        int rockRow = peopleRow;
-                        int rockCol = peopleCol + 1;
+                        rockCol = peopleCol + 1;
                         //game over
-                        if (rockCol + 1 > matrix.length - 1) {
+                        if (isOutOfBounds(matrix, rockCol + 1)) {
                             gameOver = true;
                             break;
                         }
@@ -236,49 +224,31 @@ public class Game {
                         if (matrix[rockRow][rockCol + 1] == bush) {
                             break;
                         }
-                        matrix[peopleRow][peopleCol] = 0;
+                        matrix[peopleRow][peopleCol] = empty;
                         matrix[peopleRow][++peopleCol] = people;
                         matrix[rockRow][++rockCol] = rock;
                         break;
 
                     }
-                    matrix[peopleRow][peopleCol] = 0;
+                    matrix[peopleRow][peopleCol] = empty;
                     matrix[peopleRow][++peopleCol] = people;
                     break;
 
             }
 
-            //success
-            if (matrix[matrix.length - 1][matrix.length - 1] == rock) {
+            if (rockRow == matrixLength - 2 && rockCol == matrixLength - 2) {
                 success = true;
             }
 
-            if (gameOver) {
-                matrix[peopleRow][peopleCol] = 'D';
+            //Rock game over logic
+            if (!canRockMove(matrix, rockRow, rockCol)
+                    || (rockCol == matrixLength - 2 && rightBorderBushPosition > rockRow || rightBorderBushPosition-1 == rockRow)
+                    || (rockRow == matrixLength - 2 && downBorderBushPosition > rockCol || downBorderBushPosition-1 == rockCol)) {
+                gameOver = true;
             }
-
-            for (int i = 0; i < matrix.length; i++) {
-                for (int j = 0; j < matrix.length; j++) {
-                    System.out.print(matrix[i][j] + " ");
-                    boolean isRockOnBorder = i + 1 < matrixLength  && i - 1 > -1 &&
-                            j + 1 < matrixLength && j - 1 > -1;
-
-                    //bush game over logic
-                    if (isRockOnBorder && matrix[i][j] == rock) {
-                        boolean leftBush = matrix[i][j - 1] == bush;
-                        boolean rightBush = matrix[i][j + 1] == bush;
-                        boolean upBush = matrix[i - 1][j] == bush;
-                        boolean downBush = matrix[i + 1][j] == bush;
-                        if ((leftBush && upBush) || (leftBush && downBush) ||
-                                (rightBush && upBush) || (rightBush && downBush)) {
-                            gameOver = true;
-                        }
-                    }
-                }
-                System.out.println();
-            }
-
+            printMatrix(matrix);
             if (gameOver) {
+                matrix[peopleRow][peopleCol] = deadPeople;
                 System.out.println("Game over :(");
             }
 
@@ -286,5 +256,70 @@ public class Game {
                 System.out.println("Congrats you win the game");
             }
         }
+    }
+
+    static int giveMeRandomNum(int from, int to) {
+        Random random = new Random();
+        return random.nextInt(from, to);
+    }
+
+    static int giveMeRandomNum(int to) {
+        Random random = new Random();
+        return random.nextInt(to);
+    }
+
+    static boolean canSpawnBushes(char[][] matrix, int row, int col) {
+        return (matrix[row][col] != people && matrix[row][col] != rowBorder
+                && matrix[row][col] != colBorder && matrix[row][col] != exit);
+    }
+
+    static boolean canSpawnRocks(char[][] matrix, int row, int col) {
+        return (matrix[row][col] != people && matrix[row][col] != rowBorder
+                && matrix[row][col] != colBorder && matrix[row][col] != exit && matrix[row][col] != bush);
+    }
+
+    static boolean canRockMove(char[][] matrix, int rockRow, int rockCol) {
+
+        boolean leftBush = matrix[rockRow][rockCol - 1] == bush;
+        boolean rightBush = matrix[rockRow][rockCol + 1] == bush;
+        boolean upBush = matrix[rockRow - 1][rockCol] == bush;
+        boolean downBush = matrix[rockRow + 1][rockCol] == bush;
+        boolean upBorder = matrix[rockRow - 1][rockCol] == rowBorder;
+        boolean leftBorder = matrix[rockRow][rockCol + 1] == colBorder;
+        return !((leftBush && upBush) || (leftBush && downBush) ||
+                (rightBush && upBush) || (rightBush && downBush)
+                || upBorder || leftBorder);
+    }
+
+
+    static void printMatrix(char[][] matrix) {
+        for (char[] ints : matrix) {
+            for (char anInt : ints) {
+                System.out.print(anInt + " ");
+            }
+            System.out.println();
+        }
+    }
+
+    static char[][] fillMatrix(char[][] matrix) {
+        for (int row = 0; row < matrix.length; row++) {
+
+            for (int col = 0; col < matrix.length; col++) {
+                if (row == 0 || row == matrix.length - 1) {
+                    matrix[row][col] = rowBorder;
+                } else {
+                    matrix[row][col] = empty;
+                }
+
+                if (col == 0 || col == matrix.length - 1) {
+                    matrix[row][col] = colBorder;
+                }
+            }
+        }
+        return matrix;
+    }
+
+    static boolean isOutOfBounds(char[][] matrix, int position) {
+        return (position == 0 || position == matrix.length - 1);
     }
 }
