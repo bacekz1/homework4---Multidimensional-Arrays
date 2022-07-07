@@ -58,9 +58,9 @@ public class Game {
         char[][] matrix = new char[matrixLength][matrixLength];
         //add borders and replace char 0 with ' '
         fillMatrix(matrix);
-        //add exit
+        //add the exit
         matrix[matrix.length - 2][matrix.length - 2] = exit;
-        //add people
+        //add the people
         int peopleRow = giveMeRandomNum(1, matrixLength - 2);
         int peopleCol = giveMeRandomNum(1, matrixLength - 2);
         matrix[peopleRow][peopleCol] = people;
@@ -71,16 +71,13 @@ public class Game {
             int bushRow = giveMeRandomNum(matrixLength);
             int bushCol = giveMeRandomNum(matrixLength);
             if (canSpawnBushes(matrix, bushRow, bushCol)) {
-                if (bushRow == matrixLength - 2) {
-                    if (bushCol > downBorderBushPosition) {
-                        downBorderBushPosition = bushCol;
-                    }
 
+                if (bushRow == matrixLength - 2 && bushCol > downBorderBushPosition) {
+                        downBorderBushPosition = bushCol;
                 }
-                if (bushCol == matrixLength - 2) {
-                    if (bushRow > rightBorderBushPosition) {
+                if (bushCol == matrixLength - 2 && bushRow > rightBorderBushPosition) {
                         rightBorderBushPosition = bushRow;
-                    }
+
                 }
                 matrix[bushRow][bushCol] = bush;
                 count--;
@@ -96,9 +93,8 @@ public class Game {
                 break;
             }
         }
-
         System.out.println("You can move with w = forward, a = left, s = backward and d = right");
-        //print matrix
+
         printMatrix(matrix);
 
         while (!gameOver && !success) {
@@ -107,7 +103,7 @@ public class Game {
 
             switch (directions) {
                 //up
-                case 'w':
+                case 'w' -> {
                     //game over
                     if (isOutOfBounds(matrix, peopleRow - 1)) {
                         gameOver = true;
@@ -135,12 +131,11 @@ public class Game {
                         matrix[--rockRow][rockCol] = rock;
                         break;
                     }
-
                     matrix[peopleRow][peopleCol] = empty;
                     matrix[--peopleRow][peopleCol] = people;
-                    break;
+                }
                 //left
-                case 'a':
+                case 'a' -> {
                     //game over
                     if (isOutOfBounds(matrix, peopleCol - 1)) {
                         gameOver = true;
@@ -168,18 +163,16 @@ public class Game {
                         break;
 
                     }
-
                     matrix[peopleRow][peopleCol] = empty;
                     matrix[peopleRow][--peopleCol] = people;
-                    break;
+                }
                 //down
-                case 's':
+                case 's' -> {
                     //game over
                     if (isOutOfBounds(matrix, peopleRow + 1)) {
                         gameOver = true;
                         break;
                     }
-
                     if (matrix[peopleRow + 1][peopleCol] == exit) {
                         break;
                     }
@@ -187,6 +180,7 @@ public class Game {
                     if (matrix[peopleRow + 1][peopleCol] == bush) {
                         break;
                     }
+
                     //rock logic
                     if (matrix[peopleRow + 1][peopleCol] == rock) {
                         rockRow = peopleRow + 1;
@@ -205,12 +199,11 @@ public class Game {
                         break;
 
                     }
-
                     matrix[peopleRow][peopleCol] = empty;
                     matrix[++peopleRow][peopleCol] = people;
-                    break;
+                }
                 //right
-                case 'd':
+                case 'd' -> {
                     //game over
                     if (isOutOfBounds(matrix, peopleCol + 1)) {
                         gameOver = true;
@@ -243,8 +236,7 @@ public class Game {
                     }
                     matrix[peopleRow][peopleCol] = empty;
                     matrix[peopleRow][++peopleCol] = people;
-                    break;
-
+                }
             }
 
             if (rockRow == matrixLength - 2 && rockCol == matrixLength - 2) {
@@ -303,7 +295,6 @@ public class Game {
                 || upBorder || leftBorder);
     }
 
-
     static void printMatrix(char[][] matrix) {
         for (char[] ints : matrix) {
             for (char anInt : ints) {
@@ -313,7 +304,7 @@ public class Game {
         }
     }
 
-    static char[][] fillMatrix(char[][] matrix) {
+    static void fillMatrix(char[][] matrix) {
         for (int row = 0; row < matrix.length; row++) {
 
             for (int col = 0; col < matrix.length; col++) {
@@ -327,11 +318,9 @@ public class Game {
 
             }
         }
-        return matrix;
     }
 
     static boolean isOutOfBounds(char[][] matrix, int position) {
         return (position == 0 || position == matrix.length - 1);
     }
-
 }
